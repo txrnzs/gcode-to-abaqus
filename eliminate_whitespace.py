@@ -1,9 +1,7 @@
-import numpy as np
-
 Delta = 0.1  # 在路径末尾需要延长的长度(mm)
 Point_Before = []  # 修改之前的点
 Point_Modified = []
-filename = 'T275-V10-H0_2(实际大小)_event_series.inp'
+filename = '_event_series.inp'
 
 with open(filename, 'r') as file:
     lines = file.readlines()  # 逐行读取文件内容
@@ -24,10 +22,18 @@ while i < numRows - 1:
     startP = Point_Before[i]
     endP = Point_Before[i + 1]
     if (startP[4] > 0) and (startP[3] == endP[3]):  # 如果场变量不为0 并且线段的起始点在一个平面上 那么这两个点需要被修改
-        if startP[2] != endP[2]:  # 若同一平面内前后两个点的x坐标存在不同，则修改相应的坐标值
-            dY = endP[2] - startP[2]
-            if round(dY, 2) > 0:
+        dX = endP[1] - startP[1]
+        dY = endP[2] - startP[2]
+        if round(dX, 2) != 0:
+            if Point_Before[i - 1][4] == 0:
+                Point_Modified[i][1] = Point_Modified[i][1] - dX / abs(dX) * Delta
+            if Point_Before[i + 2][4] == 0:
+                Point_Modified[i + 1][1] = Point_Modified[i + 1][1] + dX / abs(dX) * Delta
+
+        if round(dY, 2) != 0:
+            if Point_Before[i - 1][4] == 0:
                 Point_Modified[i][2] = Point_Modified[i][2] - dY / abs(dY) * Delta
+            if Point_Before[i + 2][4] == 0:
                 Point_Modified[i + 1][2] = Point_Modified[i + 1][2] + dY / abs(dY) * Delta
     i = i + 1
 
@@ -36,8 +42,8 @@ with open('output.inp', 'w') as file:
         line = ','.join(str(element) for element in row)  # 将行中的元素转换为字符串，并用逗号连接
         file.write(line + '\n')  # 将每一行写入文件，并在行末添加换行符
 
-'''
 import pandas as pd
-df = pd.DataFrame(Point_Modified) # 将数组转换为pandas数据框
-df.to_excel("Point_Modified.xlsx") # 将数据框写入excel文件
+'''
+df = pd.DataFrame(Point_Modified)  # 将数组转换为pandas数据框
+df.to_excel("Point_Modified.xlsx")  # 将数据框写入excel文件
 '''
